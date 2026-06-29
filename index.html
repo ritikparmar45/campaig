@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CreatorsMela internal Campaign Dashboard for Talent Managers. Streamlining active campaigns, approvals, deliverables, revenue summaries, and tasks.">
+    <meta name="keywords" content="CreatorsMela, Talent Management, Campaign Dashboard, Creator Economy, Influencer Marketing">
+    <meta name="author" content="CreatorsMela Development Team">
+    <title>CreatorsMela - Campaign Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="app-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo-glow"></div>
+                <i data-lucide="sparkles" class="brand-icon"></i>
+                <span class="brand-text">Creators<span>Mela</span></span>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <ul class="menu-list">
+                    <li class="menu-item active" data-view="dashboard">
+                        <a href="#dashboard" id="nav-dashboard">
+                            <i data-lucide="layout-dashboard"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" data-view="campaigns">
+                        <a href="#campaigns" id="nav-campaigns">
+                            <i data-lucide="folder-git-2"></i>
+                            <span>Campaigns</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" data-view="deliverables">
+                        <a href="#deliverables" id="nav-deliverables">
+                            <i data-lucide="calendar-clock"></i>
+                            <span>Deliverables</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" data-view="approvals">
+                        <a href="#approvals" id="nav-approvals">
+                            <i data-lucide="check-square"></i>
+                            <span>Approvals</span>
+                            <span class="badge badge-accent" id="badge-nav-approvals">0</span>
+                        </a>
+                    </li>
+                    <li class="menu-item" data-view="tasks">
+                        <a href="#tasks" id="nav-tasks">
+                            <i data-lucide="list-todo"></i>
+                            <span>Tasks</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Talent Manager Profile Selector/Footer -->
+            <div class="sidebar-profile">
+                <div class="profile-dropdown-container">
+                    <button class="profile-select-btn" id="manager-select-btn">
+                        <div class="avatar-glow"></div>
+                        <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Alex" alt="Manager Avatar" class="profile-avatar" id="active-manager-avatar">
+                        <div class="profile-info">
+                            <span class="profile-name" id="active-manager-name">Alex Mercer</span>
+                            <span class="profile-role">Lead Talent Mgr</span>
+                        </div>
+                        <i data-lucide="chevrons-up-down" class="profile-chevron"></i>
+                    </button>
+                    
+                    <div class="profile-dropdown" id="manager-dropdown">
+                        <div class="dropdown-header">Switch Portfolio</div>
+                        <button class="dropdown-item active" data-manager="alex">
+                            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Alex" alt="Alex">
+                            <div class="dropdown-item-details">
+                                <span class="name">Alex Mercer</span>
+                                <span class="niche">Tech & Gaming</span>
+                            </div>
+                        </button>
+                        <button class="dropdown-item" data-manager="elena">
+                            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Elena" alt="Elena">
+                            <div class="dropdown-item-details">
+                                <span class="name">Elena Rostova</span>
+                                <span class="niche">Fashion & Lifestyle</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Panel Content -->
+        <main class="main-panel">
+            <!-- Top Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-sidebar-toggle" id="sidebar-toggle" aria-label="Toggle Sidebar">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="greeting-box">
+                        <h1 class="page-title" id="page-greeting">Overview</h1>
+                        <p class="subtitle" id="manager-niche-subtitle">Tech & Gaming Campaigns</p>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <!-- Search bar -->
+                    <div class="search-wrapper">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" placeholder="Search campaigns, creators..." class="search-input" id="global-search">
+                        <kbd class="search-kbd">/</kbd>
+                    </div>
+                    
+                    <!-- Quick actions in top bar -->
+                    <div class="quick-header-actions">
+                        <button class="header-btn" id="header-btn-campaign" title="New Campaign">
+                            <i data-lucide="plus-circle"></i>
+                            <span class="btn-text">New Campaign</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="notification-container">
+                        <button class="icon-btn" id="notification-btn" aria-label="Notifications">
+                            <i data-lucide="bell"></i>
+                            <span class="notification-dot" id="noti-dot"></span>
+                        </button>
+                        <div class="notifications-dropdown" id="notifications-dropdown">
+                            <div class="dropdown-header">
+                                <span>Recent Notifications</span>
+                                <button class="clear-all-btn" id="clear-noti-btn">Clear All</button>
+                            </div>
+                            <div class="notification-list" id="notification-list">
+                                <!-- Dynamic notifications load here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="content-body" id="dashboard-view">
+                <!-- Row 1: KPI Stats Widgets -->
+                <section class="kpi-grid">
+                    <!-- Revenue Stats Card -->
+                    <div class="kpi-card" id="kpi-revenue">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Revenue Managed</span>
+                            <div class="kpi-icon-wrapper revenue-icon">
+                                <i data-lucide="dollar-sign"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-val-revenue">$0</div>
+                        <div class="kpi-footer text-positive">
+                            <i data-lucide="trending-up"></i>
+                            <span id="kpi-trend-revenue">+12.4% this month</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Campaigns Card -->
+                    <div class="kpi-card" id="kpi-campaigns">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Active Campaigns</span>
+                            <div class="kpi-icon-wrapper campaigns-icon">
+                                <i data-lucide="rocket"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-val-campaigns">0</div>
+                        <div class="kpi-footer">
+                            <span id="kpi-sub-campaigns">0 starting next week</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Pending Approvals Card -->
+                    <div class="kpi-card cursor-pointer" id="kpi-approvals">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Pending Approvals</span>
+                            <div class="kpi-icon-wrapper approvals-icon">
+                                <i data-lucide="check-square"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-val-approvals">0</div>
+                        <div class="kpi-footer text-warning">
+                            <i data-lucide="alert-circle"></i>
+                            <span id="kpi-sub-approvals">0 require immediate review</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Deliverables Due Card -->
+                    <div class="kpi-card" id="kpi-deliverables">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Deliverables Due</span>
+                            <div class="kpi-icon-wrapper deliverables-icon">
+                                <i data-lucide="calendar"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value" id="kpi-val-deliverables">0</div>
+                        <div class="kpi-footer text-danger">
+                            <i data-lucide="clock"></i>
+                            <span id="kpi-sub-deliverables">0 due today</span>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Row 2: Charts and Main Quick Actions -->
+                <section class="analytics-section">
+                    <!-- Revenue Analytics Chart Card -->
+                    <div class="dashboard-card chart-card">
+                        <div class="card-header">
+                            <div class="header-main">
+                                <h3 class="card-title">Revenue & Commissions</h3>
+                                <p class="card-subtitle">Monthly financial overview for this portfolio</p>
+                            </div>
+                            <div class="chart-controls">
+                                <div class="chart-toggles">
+                                    <button class="chart-toggle-btn active" id="toggle-chart-revenue">Managed Budget</button>
+                                    <button class="chart-toggle-btn" id="toggle-chart-commissions">Commissions (15%)</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body chart-body">
+                            <canvas id="revenue-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card quick-actions-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Actions</h3>
+                            <p class="card-subtitle">Instant management triggers</p>
+                        </div>
+                        <div class="card-body actions-grid">
+                            <button class="action-tile btn-violet" id="action-launch-campaign">
+                                <div class="action-icon">
+                                    <i data-lucide="folder-plus"></i>
+                                </div>
+                                <span class="action-title">Launch Campaign</span>
+                                <span class="action-description">Register a new client collab</span>
+                            </button>
+                            <button class="action-tile btn-indigo" id="action-add-task">
+                                <div class="action-icon">
+                                    <i data-lucide="clipboard-list"></i>
+                                </div>
+                                <span class="action-title">Log Today's Task</span>
+                                <span class="action-description">Insert to active checklist</span>
+                            </button>
+                            <button class="action-tile btn-emerald" id="action-export-report">
+                                <div class="action-icon">
+                                    <i data-lucide="download"></i>
+                                </div>
+                                <span class="action-title">Export Report</span>
+                                <span class="action-description">Download CSV summaries</span>
+                            </button>
+                            <button class="action-tile btn-amber" id="action-toast-test">
+                                <div class="action-icon">
+                                    <i data-lucide="activity"></i>
+                                </div>
+                                <span class="action-title">Check Platform Status</span>
+                                <span class="action-description">Verify API server feeds</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Row 3: Campaigns, Approvals, and Deliverables -->
+                <section class="split-grid">
+                    <!-- Active Campaigns Section -->
+                    <div class="dashboard-card campaigns-list-card">
+                        <div class="card-header-tabs">
+                            <div class="header-main">
+                                <h3 class="card-title">Campaign Portfolio</h3>
+                                <p class="card-subtitle">Performance tracking and milestones</p>
+                            </div>
+                            <div class="campaign-filters">
+                                <button class="filter-tab active" data-filter="all">All</button>
+                                <button class="filter-tab" data-filter="planning">Planning</button>
+                                <button class="filter-tab" data-filter="in_progress">Active</button>
+                                <button class="filter-tab" data-filter="live">Live</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="campaign-grid-list" id="campaigns-list-container">
+                                <!-- Dynamic Campaigns Rendered Here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sidebar Items: Pending Approvals & Upcoming Deliverables -->
+                    <div class="sidebar-cards-column">
+                        <!-- Pending Content Approvals -->
+                        <div class="dashboard-card approvals-card">
+                            <div class="card-header">
+                                <div class="header-main">
+                                    <h3 class="card-title">Pending Approvals</h3>
+                                    <p class="card-subtitle">Review content before brand release</p>
+                                </div>
+                                <span class="badge badge-accent-glow" id="badge-approvals-count">0</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="approvals-stack" id="approvals-stack-container">
+                                    <!-- Dynamic Approvals Rendered Here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Upcoming Deliverables -->
+                        <div class="dashboard-card deliverables-card">
+                            <div class="card-header">
+                                <div class="header-main">
+                                    <h3 class="card-title">Upcoming Deliverables</h3>
+                                    <p class="card-subtitle">Required timeline handovers</p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="deliverables-list" id="deliverables-list-container">
+                                    <!-- Dynamic Deliverables Rendered Here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Row 4: Tasks Section -->
+                <section class="tasks-section">
+                    <div class="dashboard-card tasks-card">
+                        <div class="card-header flex-header">
+                            <div class="header-main">
+                                <h3 class="card-title">Today's Tasks</h3>
+                                <p class="card-subtitle">Talent manager check-list items</p>
+                            </div>
+                            
+                            <!-- Task completion progress -->
+                            <div class="task-progress-box">
+                                <span class="task-progress-text" id="task-pct-text">0% Complete</span>
+                                <div class="task-progress-bar-bg">
+                                    <div class="task-progress-bar-fill" id="task-pct-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Task input field -->
+                            <form id="add-task-form" class="task-input-form">
+                                <input type="text" placeholder="Type a task and press Enter (e.g. Schedule photoshoot with Zach)..." id="task-input-text" required autocomplete="off">
+                                <button type="submit" class="task-add-btn">
+                                    <i data-lucide="plus"></i>
+                                    <span>Add Task</span>
+                                </button>
+                            </form>
+                            
+                            <!-- Task list container -->
+                            <ul class="task-checklist" id="tasks-list-container">
+                                <!-- Dynamic tasks rendered here -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal: Launch Campaign -->
+    <div class="modal-backdrop" id="campaign-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Launch New Campaign</h3>
+                <button class="modal-close-btn" id="modal-close-campaign"><i data-lucide="x"></i></button>
+            </div>
+            <form id="campaign-launch-form" class="modal-form">
+                <div class="form-grid">
+                    <div class="form-group col-2">
+                        <label for="input-camp-name">Campaign Title</label>
+                        <input type="text" id="input-camp-name" required placeholder="e.g. Cyberpunk Mouse Promotion">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-creator">Creator Name</label>
+                        <input type="text" id="input-creator" required placeholder="e.g. Marcus Tech">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-brand">Brand Client</label>
+                        <input type="text" id="input-brand" required placeholder="e.g. Logitech">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-platform">Primary Platform</label>
+                        <select id="input-platform" required>
+                            <option value="youtube">YouTube</option>
+                            <option value="tiktok">TikTok</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="twitch">Twitch</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-budget">Campaign Budget ($)</label>
+                        <input type="number" id="input-budget" min="500" required placeholder="e.g. 15000">
+                    </div>
+                    <div class="form-group">
+                        <label for="input-status">Initial Status</label>
+                        <select id="input-status" required>
+                            <option value="planning">Planning (Draft)</option>
+                            <option value="in_progress">Content Creation</option>
+                            <option value="live">Live / Campaign Launched</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-progress">Start Progress (%)</label>
+                        <input type="number" id="input-progress" min="0" max="100" value="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" id="btn-cancel-campaign">Cancel</button>
+                    <button type="submit" class="btn-submit">Launch Campaign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Image Preview Modal (For visual approval inspection) -->
+    <div class="modal-backdrop" id="preview-modal">
+        <div class="modal-container preview-modal-container">
+            <div class="modal-header">
+                <h3 id="preview-modal-title">Creator Draft Review</h3>
+                <button class="modal-close-btn" id="modal-close-preview"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body preview-modal-body">
+                <img src="" alt="Draft Preview Large" class="large-draft-image" id="preview-modal-image">
+                <div class="preview-meta">
+                    <div class="preview-meta-info">
+                        <span class="preview-label">Creator Notes:</span>
+                        <p class="preview-description" id="preview-modal-notes"></p>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn-reject-modal" id="btn-reject-draft">Request Edits</button>
+                        <button class="btn-approve-modal" id="btn-approve-draft">Approve Draft</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Core Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
